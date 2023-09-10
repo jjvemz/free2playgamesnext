@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { IGames } from "@/models/IGames";
 import getAllGames from "@/services/getAllGames";
 import { AxiosResponse } from "axios";
+import Cards from "@/components/cards";
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
 
 interface IState {
   loading: boolean;
@@ -45,6 +48,7 @@ export default function Home() {
       <Head>
         <title>Create Next App</title>
       </Head>
+      {console.log("The API data is: ", state.games)}
       <main>
         <div >
           <div></div>
@@ -55,27 +59,26 @@ export default function Home() {
         </div>
         
         <div>
-          <table >
-            <thead>
-              <tr>
-                <td>Id</td>
-                <td>title</td>
-                <td>genre</td>
-                <td>platform</td>
-              </tr>
-            </thead>
-            <tbody>
-              {state.games.length > 0 &&
+        <Box sx={{ width: '100%' }}>
+            <Grid container spacing={4}>
+              {
+              state.games.length > 0 &&
                 state.games.map((gamesData) => (
-                  <tr key={gamesData.id}>
-                    <td>{gamesData.id}</td>
-                    <td>{gamesData.title}</td>
-                    <td>{gamesData.genre}</td>
-                    <td>{gamesData.platform}</td>
-                  </tr>
+                  
+                      <Grid item xs={4} key={gamesData.id}>
+                        <Cards 
+                          title={gamesData.title}
+                          short_description={gamesData.short_description}
+                          thumbnail={gamesData.thumbnail}
+                          release_date={gamesData.release_date}
+                          game_url={gamesData.game_url}
+                          genre={gamesData.genre}
+                          developer={gamesData.developer}
+                          />
+                      </Grid>
                 ))}
-            </tbody>
-          </table>
+                 </Grid>
+                </Box>
         </div>
       </main>
     </>
