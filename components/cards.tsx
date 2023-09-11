@@ -6,6 +6,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
+
 const Cards = (props: any) => {
         const {title, short_description, 
             thumbnail, genre, developer} = props;

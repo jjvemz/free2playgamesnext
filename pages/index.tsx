@@ -5,9 +5,13 @@ import { useEffect, useState } from "react";
 import { IGames } from "@/models/IGames";
 import getAllGames from "@/services/getAllGames";
 import { AxiosResponse } from "axios";
-import Cards from "@/components/cards";
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+
+import Cards from "@/components/Cards";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 interface IState {
   loading: boolean;
@@ -22,6 +26,27 @@ export default function Home() {
     errorMsg: "",
   });
   const [filters, setfilters] = useState<string>("");
+  
+  const [chunkSize, setChunkSize] = useState<number>(9);
+  const [chunkIndex, setChunkIndex] = useState<number>(1);
+
+  const loadItems = () => {
+    setState({ ...state, loading: true });
+
+    const startIndex = (chunkIndex - 1) * chunkSize;
+    const endIndex = chunkIndex * chunkSize;
+    const nextChunk = state.games.slice(startIndex, endIndex);
+
+    if (nextChunk.length === 0) {
+      setState({ ...state, loading: false });
+      return;
+    }
+
+    setTimeout(() => {
+      setChunkIndex(chunkIndex + 1);
+      setState({ ...state, loading: false });
+    }, 1000);
+  };
 
   useEffect(() => {
     setState({ ...state, loading: true });
@@ -31,9 +56,7 @@ export default function Home() {
           ...state,
           loading: false,
           games: res.data,
-          
         })
-        
       )
       .catch((err) =>
         setState({
@@ -43,42 +66,55 @@ export default function Home() {
         })
       );
   }, []);
+
+  useEffect(() => {
+    loadItems();
+  }, [state.games]);
+
+  const renderItems = state.games.slice(0, chunkIndex * chunkSize);
   return (
     <>
       <Head>
-        <title>Create Next App</title>
+        <title>Free To Games API Project</title>
       </Head>
-      {console.log("The API data is: ", state.games)}
+      {console.log("The chunkIndex is ", chunkIndex)}
       <main>
-        <div >
-          <div></div>
-        </div>
+        <div className={styles.main}>
+          <div className={styles.center}>
+            <Box sx={{ width: "100%" }}>
+              <Grid container spacing={4}>
+                {renderItems.length > 0 &&
+                  renderItems.map((gamesData) => (
+                    <Grid item xs={4} key={gamesData.id}>
+                      <Cards
+                        title={gamesData.title}
+                        short_description={gamesData.short_description}
+                        thumbnail={gamesData.thumbnail}
+                        release_date={gamesData.release_date}
+                        game_url={gamesData.game_url}
+                        genre={gamesData.genre}
+                        developer={gamesData.developer}
+                      />
+                    </Grid>
+                  ))}
+                {state.loading && <p>Loading...</p>}
+                {!state.loading && renderItems.length < state.games.length && (
 
-        <div className={styles.center}>
-          
-        </div>
-        
-        <div>
-        <Box sx={{ width: '100%' }}>
-            <Grid container spacing={4}>
-              {
-              state.games.length > 0 &&
-                state.games.map((gamesData) => (
+                  <LoadingButton
+                  size="small"
+                  onClick={loadItems}
+                  endIcon={<ExpandMoreIcon />}
+                  loading={state.loading}
+                  loadingPosition="end"
+                  variant="contained"
+                  >
+                  <span>Load More</span>
+                  </LoadingButton>
                   
-                      <Grid item xs={4} key={gamesData.id}>
-                        <Cards 
-                          title={gamesData.title}
-                          short_description={gamesData.short_description}
-                          thumbnail={gamesData.thumbnail}
-                          release_date={gamesData.release_date}
-                          game_url={gamesData.game_url}
-                          genre={gamesData.genre}
-                          developer={gamesData.developer}
-                          />
-                      </Grid>
-                ))}
-                 </Grid>
-                </Box>
+                )}
+              </Grid>
+            </Box>
+          </div>
         </div>
       </main>
     </>
